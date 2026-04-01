@@ -20,7 +20,7 @@
         }
         .fade-out-7s {
             animation: fadeOutAndCollapse 7s ease-out forwards;
-            pointer-events: none; /* يمنع الضغط أثناء الاختفاء */
+            pointer-events: none;
         }
     </style>
 </head>
@@ -137,7 +137,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, collection, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // إعدادات قاعدة البيانات (نفس إعدادات الأدمن لضمان التزامن)
         const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'farah-snacks-v3';
         const FIREBASE_CONFIG = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyCHJ4leiSUZAnzA6NQE-DkJDv_Z34VQXLU",
@@ -152,19 +151,22 @@
         const PATH_FEEDBACK = `artifacts/${APP_ID}/public/data/feedback`;
         const PATH_EMPLOYEES = `artifacts/${APP_ID}/public/data/employees`;
 
+        let ignoredFallback = [];
+        try { ignoredFallback = JSON.parse(localStorage.getItem('rashed_ignored_orders') || '[]'); } catch(e) { ignoredFallback = []; }
+
         let appState = {
             db: null,
             adminAllOrders: [],
             adminAllFeedback: [],
             adminEmployees: [],
-            fadingOrders: {}, // لتتبع الطلبات التي تختفي
-            currentUser: null, // سيتم تعيينه عند تسجيل الدخول
+            fadingOrders: {}, 
+            ignoredOrders: ignoredFallback,
+            currentUser: null, 
             isLoggedIn: false
         };
 
-        const EMP_NAME = 'راشد'; // اسم الموظف المخصص لهذه الصفحة
+        const EMP_NAME = 'راشد'; 
 
-        // دوال مساعدة
         const showToast = (msg, type) => {
             const c = document.getElementById('toast-container');
             if(!c) return;
@@ -176,7 +178,17 @@
             setTimeout(() => el.remove(), 4000);
         };
 
-        // تهيئة النظام
+        // دالة آمنة لمعالجة تواريخ الطلبات
+        const getOrderDateStr = (createdAt) => {
+            let d = new Date();
+            if (createdAt && typeof createdAt.toMillis === 'function') {
+                d = new Date(createdAt.toMillis());
+            } else if (createdAt && createdAt.seconds) {
+                d = new Date(createdAt.seconds * 1000);
+            }
+            return d.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+        };
+
         const initFirebase = async () => {
             try {
                 const app = initializeApp(FIREBASE_CONFIG);
@@ -184,13 +196,12 @@
                 const auth = getAuth(app);
                 await signInAnonymously(auth);
                 
-                initDataListeners(); // تفعيل الجلب الفوري للبيانات للتحقق من كلمة السر لاحقاً
+                initDataListeners();
 
-                // التحقق من الجلسة المحفوظة
                 const savedUser = localStorage.getItem('rashed_logged_in');
                 if (savedUser) {
-                    appState.currentUser = JSON.parse(savedUser);
-                    showDashboard();
+                    try { appState.currentUser = JSON.parse(savedUser); } catch(e) {}
+                    if(appState.currentUser) showDashboard();
                 }
             } catch (e) {
                 console.error("Firebase init err", e);
@@ -199,16 +210,13 @@
             if(window.lucide) lucide.createIcons();
         };
 
-        // جلب البيانات لحظياً من السحابة
         const initDataListeners = () => {
             if (!appState.db) return;
             
-            // جلب بيانات الموظفين (لتحديث الإحصائيات اليدوية إن وجدت)
             onSnapshot(collection(appState.db, PATH_EMPLOYEES), (snap) => {
                 if(!snap.empty) {
                     appState.adminEmployees = snap.docs.map(d => ({...d.data(), id: d.id}));
                     if(appState.isLoggedIn && appState.currentUser) {
-                        // تحديث الإحصائيات اليدوية للمستخدم الحالي
                         const updatedMe = appState.adminEmployees.find(e => e.id === 'emp_1');
                         if(updatedMe) {
                             appState.currentUser.manualCompleted = updatedMe.manualCompleted || 0;
@@ -219,7 +227,6 @@
                 }
             });
 
-            // جلب الطلبات
             onSnapshot(collection(appState.db, PATH_ORDERS), (snap) => {
                 let hasNew = false;
                 if (appState.adminAllOrders.length > 0) {
@@ -238,22 +245,18 @@
                 }
             });
 
-            // جلب التقييمات
             onSnapshot(collection(appState.db, PATH_FEEDBACK), (snap) => {
                 appState.adminAllFeedback = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 if(appState.isLoggedIn) window.renderEmployeeStats();
             });
         };
 
-        // تسجيل الدخول
         window.handleLogin = () => {
             const passStr = document.getElementById('login-password-input').value;
             
-            // تسجيل الدخول بكلمة سر ثابتة (2012) لتجنب أخطاء المزامنة مع لوحة الأدمن
             if(passStr === '2012') {
                 const emp = { id: 'emp_1', name: EMP_NAME, role: 'employee', manualCompleted: 0, manualCanceled: 0 };
                 
-                // جلب الإحصائيات اليدوية إذا كانت محملة مسبقاً
                 const syncEmp = appState.adminEmployees.find(e => e.id === 'emp_1');
                 if(syncEmp) {
                     emp.manualCompleted = syncEmp.manualCompleted || 0;
@@ -295,7 +298,6 @@
             window.renderEmployeeStats();
         };
 
-        // تبديل التبويبات
         window.switchEmpTab = (t) => {
             ['orders', 'stats'].forEach(tab => {
                 const sec = document.getElementById(`emp-${tab}-sec`);
@@ -311,9 +313,15 @@
             });
         };
 
-        // --- إدارة الطلبات للموظف ---
-        
-        // قبول الطلب
+        window.empIgnoreOrder = (orderId) => {
+            if (!appState.ignoredOrders.includes(orderId)) {
+                appState.ignoredOrders.push(orderId);
+                localStorage.setItem('rashed_ignored_orders', JSON.stringify(appState.ignoredOrders));
+                showToast("تم تجاهل الطلب بنجاح (مخفي من شاشتك فقط)", "success");
+                window.renderEmployeeOrders();
+            }
+        };
+
         window.empAcceptOrder = async (orderId) => {
             if(!appState.db) return;
             try {
@@ -325,7 +333,6 @@
             } catch(e) { showToast("خطأ في القبول", "error"); }
         };
 
-        // إكمال الطلب (توصيل)
         window.empCompleteOrder = async (orderId) => {
             if(!appState.db) return;
             if(confirm('هل أنت متأكد من تسليم الطلب للعميل وإنهاء المعاملة؟')) {
@@ -338,18 +345,15 @@
             }
         };
 
-        // تغيير حالة المنتج (موجود / غير موجود)
         window.toggleItemAvailability = async (orderId, itemIndex) => {
             const order = appState.adminAllOrders.find(o => o.id === orderId);
             if(!order) return;
-            const items = [...order.items];
+            const items = [...(order.items || [])];
             
-            // تبديل الحالة
             items[itemIndex].isAvailable = items[itemIndex].isAvailable === false ? true : false;
             
-            // إعادة حساب المجموع للمنتجات المتوفرة فقط
             let newTotalProducts = 0;
-            items.forEach(i => { if(i.isAvailable !== false) newTotalProducts += (i.quantity * i.product.price); });
+            items.forEach(i => { if(i.isAvailable !== false) newTotalProducts += ((i.quantity || 1) * (i.product?.price || 0)); });
             const finalTotal = newTotalProducts + (order.fees?.delivery||0) + (order.fees?.service||0) - (order.fees?.discount||0);
             
             try {
@@ -358,7 +362,6 @@
             } catch(e) { showToast("خطأ في التحديث", "error"); }
         };
 
-        // رسم الطلبات (التي بعهدته، والجديدة، والتي أخذها غيره وتختفي)
         window.renderEmployeeOrders = () => {
             if(!appState.currentUser) return;
             const secActive = document.getElementById('emp-my-orders-list');
@@ -369,36 +372,36 @@
             const now = Date.now();
 
             appState.adminAllOrders.forEach(o => {
+                if (!o.status) return;
                 if (o.status === 'تم توصيل الطلب بنجاح' || o.status === 'مرفوض') return;
 
                 if (o.handledBy === appState.currentUser.id && o.status !== 'بانتظار قبول الطلب') {
-                    // طلب بعهدة راشد
                     myActive.push(o);
                 } else if (o.status === 'بانتظار قبول الطلب') {
-                    // طلب جديد متاح للجميع
-                    newOrFading.push(o);
-                } else if (o.handledBy && o.handledBy !== appState.currentUser.id) {
-                    // طلب تم أخذه بواسطة موظف آخر أو الأدمن (يجب أن يختفي ببطء)
-                    if (!appState.fadingOrders[o.id]) {
-                        appState.fadingOrders[o.id] = now;
-                    }
-                    // يختفي بعد 7 ثواني
-                    if (now - appState.fadingOrders[o.id] < 7000) {
+                    if (!appState.ignoredOrders.includes(o.id)) {
                         newOrFading.push(o);
+                    }
+                } else if (o.handledBy && o.handledBy !== appState.currentUser.id) {
+                    if (!appState.ignoredOrders.includes(o.id)) {
+                        if (!appState.fadingOrders[o.id]) {
+                            appState.fadingOrders[o.id] = now;
+                        }
+                        if (now - appState.fadingOrders[o.id] < 7000) {
+                            newOrFading.push(o);
+                        }
                     }
                 }
             });
 
-            // رسم الطلبات بعهدة الموظف (راشد)
             if (myActive.length === 0) {
                 secActive.innerHTML = '<div class="col-span-full bg-white p-6 rounded-2xl border text-center border-dashed border-gray-300"><p class="text-gray-400 text-sm font-bold">لا توجد طلبات قيد التنفيذ لديك حالياً</p></div>';
             } else {
                 secActive.innerHTML = myActive.map(o => {
-                    const itemsHtml = o.items.map((i, idx) => `
+                    const itemsHtml = (o.items || []).map((i, idx) => `
                         <div class="flex justify-between items-center bg-white p-2 rounded-lg mb-2 border ${i.isAvailable === false ? 'opacity-60 border-red-200 bg-red-50' : 'border-gray-100 shadow-sm'}">
                             <div class="flex items-center gap-2">
-                                <img src="${i.product.image}" class="w-8 h-8 rounded object-contain bg-gray-100">
-                                <span class="text-sm font-bold ${i.isAvailable === false ? 'line-through text-gray-400' : 'text-[#002d74]'}">${i.product.name} <span class="text-[#00839b]">x${i.quantity}</span></span>
+                                <img src="${i.product?.image || ''}" class="w-8 h-8 rounded object-contain bg-gray-100">
+                                <span class="text-sm font-bold ${i.isAvailable === false ? 'line-through text-gray-400' : 'text-[#002d74]'}">${i.product?.name || 'منتج'} <span class="text-[#00839b]">x${i.quantity || 1}</span></span>
                             </div>
                             <button onclick="window.toggleItemAvailability('${o.id}', ${idx})" class="text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm ${i.isAvailable === false ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100'}">
                                 ${i.isAvailable === false ? 'تغيير لموجود' : 'غير موجود (نَفَذ)'}
@@ -409,24 +412,24 @@
                     return `
                     <div class="bg-blue-50 p-5 rounded-2xl border border-blue-200 shadow-sm relative transition-all">
                         <div class="flex justify-between items-start mb-3 border-b border-blue-100 pb-2">
-                            <h4 class="font-bold text-[#002d74] text-lg flex items-center gap-1"><i data-lucide="user" class="w-4 h-4 text-gray-400"></i> ${o.customerName}</h4>
+                            <h4 class="font-bold text-[#002d74] text-lg flex items-center gap-1"><i data-lucide="user" class="w-4 h-4 text-gray-400"></i> ${o.customerName || 'عميل'}</h4>
                             <span class="bg-[#00839b] text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">بعهْدَتك</span>
                         </div>
                         <div class="space-y-2 mb-3 text-sm">
-                            <p class="font-bold text-gray-600 bg-white px-3 py-2 rounded-lg inline-block w-full border border-gray-100"><i data-lucide="map-pin" class="w-4 h-4 inline text-[#00839b]"></i> ${o.location}</p>
+                            <p class="font-bold text-gray-600 bg-white px-3 py-2 rounded-lg inline-block w-full border border-gray-100"><i data-lucide="map-pin" class="w-4 h-4 inline text-[#00839b]"></i> ${o.location || 'غير محدد'}</p>
                             ${o.addressDetails ? `<p class="font-bold text-gray-700 bg-yellow-50 px-3 py-2 rounded-lg w-full border border-yellow-100"><span class="text-xs block text-yellow-600">العنوان التفصيلي:</span> ${o.addressDetails}</p>` : ''}
-                            <p class="font-bold text-gray-600 bg-white px-3 py-2 rounded-lg inline-block w-full border border-gray-100" dir="ltr"><i data-lucide="phone" class="w-4 h-4 inline text-[#00839b]"></i> ${o.phone}</p>
+                            <p class="font-bold text-gray-600 bg-white px-3 py-2 rounded-lg inline-block w-full border border-gray-100" dir="ltr"><i data-lucide="phone" class="w-4 h-4 inline text-[#00839b]"></i> ${o.phone || 'بدون رقم'}</p>
                         </div>
                         
                         <div class="mb-4">
-                            <h5 class="text-xs font-bold text-gray-500 mb-2">المنتجات (${o.items.length}):</h5>
+                            <h5 class="text-xs font-bold text-gray-500 mb-2">المنتجات (${(o.items || []).length}):</h5>
                             ${itemsHtml}
                         </div>
                         
                         <div class="flex justify-between items-center border-t border-blue-200 pt-4 bg-white -mx-5 -mb-5 px-5 py-4 rounded-b-2xl">
                             <div>
                                 <span class="text-xs text-gray-500 block mb-0.5">المطلوب كاش من العميل</span>
-                                <span class="font-black text-[#002d74] text-xl">${(o.cashToCollect !== undefined ? o.cashToCollect : o.total).toFixed(2)} د.أ</span>
+                                <span class="font-black text-[#002d74] text-xl">${(o.cashToCollect !== undefined ? o.cashToCollect : (o.total || 0)).toFixed(2)} د.أ</span>
                             </div>
                             <button onclick="window.empCompleteOrder('${o.id}')" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md flex items-center gap-2"><i data-lucide="check" class="w-5 h-5"></i> إكمال التوصيل</button>
                         </div>
@@ -434,7 +437,6 @@
                 }).join('');
             }
 
-            // رسم الطلبات الجديدة والمختفية
             if (newOrFading.length === 0) {
                 secNew.innerHTML = '<div class="col-span-full text-center py-8 opacity-50"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i><p class="text-gray-500 text-sm font-bold">لا توجد طلبات جديدة بانتظار القبول</p></div>';
             } else {
@@ -455,27 +457,30 @@
                         </div>`;
                     }
 
-                    const itemsText = o.items.map(i => `${i.product.name} (x${i.quantity})`).join('، ');
+                    const itemsText = (o.items || []).map(i => `${i.product?.name || 'منتج'} (x${i.quantity || 1})`).join('، ');
 
                     return `
                     <div class="p-5 rounded-2xl border shadow-sm transition-all ${cardClass} flex flex-col justify-between">
                         ${overlay}
                         <div>
                             <div class="flex justify-between items-start mb-3 border-b border-gray-50 pb-2">
-                                <h4 class="font-bold text-[#002d74] text-lg"><i data-lucide="user" class="w-4 h-4 inline text-gray-400"></i> ${o.customerName}</h4>
-                                <span class="text-xs text-gray-500 font-bold bg-gray-100 px-2 py-1 rounded-md">${new Date(o.createdAt?.toMillis() || Date.now()).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</span>
+                                <h4 class="font-bold text-[#002d74] text-lg"><i data-lucide="user" class="w-4 h-4 inline text-gray-400"></i> ${o.customerName || 'عميل'}</h4>
+                                <span class="text-xs text-gray-500 font-bold bg-gray-100 px-2 py-1 rounded-md">${getOrderDateStr(o.createdAt)}</span>
                             </div>
                             <p class="text-xs font-bold text-gray-500 mb-1">تفاصيل المنتجات:</p>
-                            <p class="text-sm text-gray-700 font-bold bg-gray-50 p-2 rounded-lg mb-3 truncate" title="${itemsText}">${itemsText}</p>
-                            <p class="text-xs text-gray-500 font-bold mb-4 bg-gray-50 p-2 rounded-lg"><i data-lucide="map-pin" class="w-4 h-4 inline text-[#00839b]"></i> المنطقة: ${o.location}</p>
+                            <p class="text-sm text-gray-700 font-bold bg-gray-50 p-2 rounded-lg mb-3 truncate" title="${itemsText}">${itemsText || 'لا يوجد تفاصيل'}</p>
+                            <p class="text-xs text-gray-500 font-bold mb-4 bg-gray-50 p-2 rounded-lg"><i data-lucide="map-pin" class="w-4 h-4 inline text-[#00839b]"></i> المنطقة: ${o.location || 'غير محدد'}</p>
                         </div>
                         
                         <div class="flex justify-between items-center border-t border-gray-100 pt-4 mt-auto">
                             <div>
                                 <span class="text-xs text-gray-400 block mb-0.5">القيمة</span>
-                                <span class="font-black text-[#00839b] text-xl">${o.total.toFixed(2)} د.أ</span>
+                                <span class="font-black text-[#00839b] text-xl">${(o.total || 0).toFixed(2)} د.أ</span>
                             </div>
-                            ${!isFading ? `<button onclick="window.empAcceptOrder('${o.id}')" class="bg-[#002d74] hover:bg-[#001d4a] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md flex items-center gap-1"><i data-lucide="hand" class="w-4 h-4"></i> أخذ الطلب</button>` : ''}
+                            <div class="flex gap-2">
+                                ${!isFading ? `<button onclick="window.empIgnoreOrder('${o.id}')" class="bg-red-50 hover:bg-red-100 text-red-500 px-3 py-2.5 rounded-xl font-bold transition-colors shadow-sm flex items-center gap-1" title="تجاهل الطلب (إلغاء من شاشتك فقط)"><i data-lucide="eye-off" class="w-4 h-4"></i> تجاهل</button>` : ''}
+                                ${!isFading ? `<button onclick="window.empAcceptOrder('${o.id}')" class="bg-[#002d74] hover:bg-[#001d4a] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md flex items-center gap-1"><i data-lucide="hand" class="w-4 h-4"></i> أخذ الطلب</button>` : ''}
+                            </div>
                         </div>
                     </div>`;
                 }).join('');
@@ -483,7 +488,6 @@
 
             if(window.lucide) lucide.createIcons();
             
-            // منظف لإعادة الرسم بعد انتهاء الانيميشن 7 ثواني لإخفاء الكرت تماماً من الـ DOM
             if (newOrFading.some(o => appState.fadingOrders[o.id])) {
                 setTimeout(() => {
                     if(appState.isLoggedIn) window.renderEmployeeOrders();
@@ -491,26 +495,21 @@
             }
         };
 
-        // --- إحصائيات الموظف ---
         window.renderEmployeeStats = () => {
             if(!appState.currentUser) return;
             
             const myId = appState.currentUser.id;
             
-            // تصفية الطلبات الخاصة براشد
             const empOrders = appState.adminAllOrders.filter(o => o.handledBy === myId);
             const acceptedOrders = empOrders.filter(o => o.status === 'تم توصيل الطلب بنجاح');
             const rejectedOrders = empOrders.filter(o => o.status === 'مرفوض');
             
-            // دمج الأرقام اليدوية التي يضعها الأدمن (إن وجدت)
             const finalCompleted = acceptedOrders.length + (appState.currentUser.manualCompleted || 0);
             const finalCanceled = rejectedOrders.length + (appState.currentUser.manualCanceled || 0);
             
-            // الحسابات المالية (مبيعات المنتجات والتوصيل)
             const totalValue = acceptedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
             const deliverySales = acceptedOrders.reduce((sum, o) => sum + (o.fees?.delivery || 0) + (o.fees?.service || 0), 0);
             
-            // جلب التقييمات المرتبطة بطلبات هذا الموظف
             const empRatings = appState.adminAllFeedback.filter(f => f.type === 'rating' && empOrders.find(o => o.id === f.orderId));
             let avgRating = 0;
             if (empRatings.length > 0) {
@@ -518,14 +517,12 @@
                 avgRating = (sum / empRatings.length).toFixed(1);
             }
 
-            // تحديث البطاقات
             document.getElementById('emp-stat-comp').textContent = finalCompleted;
             document.getElementById('emp-stat-canc').textContent = finalCanceled;
             document.getElementById('emp-stat-total').textContent = `${totalValue.toFixed(2)} د.أ`;
             document.getElementById('emp-stat-del').textContent = `${deliverySales.toFixed(2)} د.أ`;
             document.getElementById('emp-stat-rate').innerHTML = `<i data-lucide="star" class="w-4 h-4 fill-yellow-500 text-yellow-500 inline mb-1"></i> ${avgRating > 0 ? avgRating : 'لا يوجد'} <span class="text-xs text-gray-400 font-normal">(${empRatings.length} عميل)</span>`;
 
-            // عرض سجل الفواتير المكتملة
             const invoiceList = document.getElementById('emp-invoice-list');
             if (acceptedOrders.length === 0) {
                 invoiceList.innerHTML = '<div class="bg-white p-8 rounded-2xl border border-dashed border-gray-300 text-center"><i data-lucide="file-text" class="w-10 h-10 mx-auto text-gray-300 mb-2"></i><p class="text-gray-400 text-sm font-bold">لا توجد فواتير أو طلبات مكتملة حتى الآن</p></div>';
@@ -535,13 +532,13 @@
                         <div class="flex items-center gap-3">
                             <div class="bg-green-100 p-2 rounded-lg text-green-600"><i data-lucide="check" class="w-5 h-5"></i></div>
                             <div>
-                                <h5 class="font-bold text-[#002d74] text-sm">${o.customerName}</h5>
-                                <p class="text-xs text-gray-500 font-bold mt-1">${new Date(o.createdAt?.toMillis() || Date.now()).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short'})}</p>
+                                <h5 class="font-bold text-[#002d74] text-sm">${o.customerName || 'عميل'}</h5>
+                                <p class="text-xs text-gray-500 font-bold mt-1">${getOrderDateStr(o.createdAt)}</p>
                             </div>
                         </div>
                         <div class="text-left bg-gray-50 p-2 rounded-lg border border-gray-100">
                             <span class="text-[10px] text-gray-500 block font-bold mb-0.5">قيمة الفاتورة</span>
-                            <span class="font-black text-[#00839b] block">${o.total.toFixed(2)} د.أ</span>
+                            <span class="font-black text-[#00839b] block">${(o.total || 0).toFixed(2)} د.أ</span>
                         </div>
                     </div>
                 `).join('');
