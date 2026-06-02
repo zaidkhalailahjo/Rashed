@@ -1,269 +1,228 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>hbtf.ai | للبيع</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg-color: #0b0f19;
-            --card-bg: #131a26;
-            --primary: #00f2fe;
-            --secondary: #4facfe;
-            --accent: #10b981;
-            --text: #ffffff;
-            --text-muted: #94a3b8;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hbtf.ai - Premium Domain For Sale</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 
-        body {
-            background-color: var(--bg-color);
-            /* خلفية متدرجة ثابتة بدون حركة ثقيلة لمنع التعليق */
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.05) 0%, transparent 40%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text);
-            padding: 20px;
-            overflow-x: hidden;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Cairo',sans-serif;
+}
 
-        /* أنميشن ظهور الكرت الرئيسي بسلاسة */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            padding: 40px;
-            text-align: center;
-            max-width: 550px;
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            position: relative;
-            transform: translateY(30px);
-            opacity: 0;
-            animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-            will-change: transform, opacity;
-        }
+body{
+    background:linear-gradient(135deg,#050816,#0b1228,#111827);
+    color:white;
+    overflow-x:hidden;
+}
 
-        @keyframes slideUp {
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
+.bg-animation{
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    z-index:-1;
+}
 
-        /* إشارة متوهجة تنبض (Pulse Animation) */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--accent);
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 24px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
+.circle{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(0,255,255,0.08);
+    animation:float 15s infinite linear;
+}
 
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--accent);
-            border-radius: 50%;
-            position: relative;
-        }
+.circle:nth-child(1){
+    width:250px;
+    height:250px;
+    left:5%;
+    top:10%;
+}
 
-        .badge-dot::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: pulse 1.8s infinite ease-in-out;
-        }
+.circle:nth-child(2){
+    width:350px;
+    height:350px;
+    right:10%;
+    bottom:10%;
+}
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(3); opacity: 0; }
-        }
+@keyframes float{
+    0%{transform:translateY(0px);}
+    50%{transform:translateY(-40px);}
+    100%{transform:translateY(0px);}
+}
 
-        /* اسم الدومين مع أنميشن توهج خفيف وسلس */
-        .domain {
-            font-size: clamp(2.5rem, 7vw, 4rem);
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-            direction: ltr;
-            display: inline-block;
-            letter-spacing: -1px;
-            animation: glow 3s ease-in-out infinite alternate;
-        }
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:40px 20px;
+}
 
-        @keyframes glow {
-            from { text-shadow: 0 0 0px rgba(0,242,254,0); }
-            to { text-shadow: 0 0 20px rgba(0, 242, 254, 0.2); }
-        }
+.hero{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
 
-        .subtext {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            margin-bottom: 35px;
-        }
+.domain{
+    font-size:80px;
+    font-weight:900;
+    background:linear-gradient(90deg,#00ffff,#00aaff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:glow 2s infinite alternate;
+}
 
-        /* حاوية الأسعار وتأثيرات الحركية عند تمرير الماوس */
-        .price-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
+@keyframes glow{
+    from{
+        filter:drop-shadow(0 0 10px #00ffff);
+    }
+    to{
+        filter:drop-shadow(0 0 25px #00ffff);
+    }
+}
 
-        .price-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 20px 15px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
+.subtitle{
+    margin-top:20px;
+    font-size:24px;
+    color:#d1d5db;
+}
 
-        .price-card:hover {
-            transform: scale(1.03);
-            background: rgba(255, 255, 255, 0.04);
-            border-color: var(--primary);
-            box-shadow: 0 10px 20px rgba(0, 242, 254, 0.05);
-        }
+.price-box{
+    margin-top:40px;
+    display:inline-block;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+    padding:30px;
+    border-radius:20px;
+    backdrop-filter:blur(15px);
+}
 
-        .price-val {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: #fff;
-            margin-bottom: 4px;
-        }
+.price-jod{
+    font-size:50px;
+    font-weight:800;
+    color:#00ffb7;
+}
 
-        .price-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
+.price-usd{
+    font-size:28px;
+    color:#e5e7eb;
+}
 
-        /* تفاصيل البيانات الشخصية */
-        .details-list {
-            background: rgba(0, 0, 0, 0.15);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 35px;
-            border: 1px solid rgba(255, 255, 255, 0.02);
-        }
+.contact{
+    margin-top:40px;
+}
 
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+.contact a{
+    display:inline-block;
+    text-decoration:none;
+    color:white;
+    background:#00aaff;
+    padding:15px 35px;
+    border-radius:12px;
+    font-weight:bold;
+    transition:.3s;
+}
 
-        .detail-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
+.contact a:hover{
+    transform:translateY(-5px);
+    box-shadow:0 10px 30px rgba(0,170,255,.4);
+}
 
-        .detail-row:first-child {
-            padding-top: 0;
-        }
+.info{
+    margin-top:70px;
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:20px;
+}
 
-        .detail-lbl {
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
-        }
+.card{
+    width:250px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:18px;
+    padding:25px;
+    backdrop-filter:blur(10px);
+    transition:.3s;
+}
 
-        .detail-val {
-            font-weight: 600;
-            font-size: 1.05rem;
-        }
+.card:hover{
+    transform:translateY(-8px);
+}
 
-        /* زر التواصل الأكشن وتأثيره الحركي السلس الحجم المتغير */
-        .btn-whatsapp {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
-            color: #0b0f19;
-            text-decoration: none;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(0, 242, 254, 0.2);
-        }
+.card h3{
+    color:#00ffff;
+    margin-bottom:10px;
+}
 
-        .btn-whatsapp:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(0, 242, 254, 0.4);
-            filter: brightness(1.1);
-        }
-
-        .btn-whatsapp:active {
-            transform: translateY(1px);
-        }
-
-        .btn-whatsapp svg {
-            width: 24px;
-            height: 24px;
-            fill: #0b0f19;
-        }
-
-        /* استجابة الشاشات الصغيرة */
-        @media (max-width: 480px) {
-            .card { padding: 30px 20px; }
-            .price-grid { grid-template-columns: 1fr; gap: 12px; }
-            .domain { font-size: 2.8rem; }
-        }
-    </style>
+.footer{
+    text-align:center;
+    padding:40px;
+    color:#9ca3af;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="card">
-        <div class="badge">
-            <span class="badge-dot"></span>
-            <span>هذا النطاق متاح للشراء الفوري</span>
-        </div>
-        
-        <h1 class="domain">hbtf.ai</h1>
-        <p class="subtext">فرصة استثمارية ممتازة لشركات الذكاء الاصطناعي والتكنولوجيا.</p>
+<div class="bg-animation">
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
 
-        <div class="price-grid">
-            <div class="price-card">
-                <div class="price-val">10,000</div>
-                <div class="price-label">دينار أردني (JOD)</div>
-            </div>
-            <div class="price-card">
-                <div class="price-val">14,100</div>
-                <div class="price-label">دولار أمريكي (USD)</div>
-            </div>
-        </div>
+<section class="hero">
+<div class="container">
 
-        <div class="details-list">
-            <div class="detail-row">
-                <div class="detail-lbl"><span>📍</span> الموقع الجغرافي</div>
+<h1 class="domain">hbtf.ai</h1>
+
+<p class="subtitle">
+دومين مميز وقصير مناسب للذكاء الاصطناعي والتكنولوجيا والمشاريع المستقبلية
+</p>
+
+<div class="price-box">
+    <div class="price-jod">10,000 دينار أردني</div>
+    <div class="price-usd">$14,100 USD</div>
+</div>
+
+<div class="contact">
+    <a href="tel:+962790926407">
+        تواصل الآن
+    </a>
+</div>
+
+<div class="info">
+
+<div class="card">
+    <h3>الدولة</h3>
+    <p>الأردن</p>
+</div>
+
+<div class="card">
+    <h3>رقم التواصل</h3>
+    <p>0790926407</p>
+</div>
+
+<div class="card">
+    <h3>الحالة</h3>
+    <p>متاح للبيع</p>
+</div>
+
+</div>
+
+</div>
+</section>
+
+<div class="footer">
+© 2026 hbtf.ai - Premium Domain For Sale
+</div>
+
+</body>
+</html>
