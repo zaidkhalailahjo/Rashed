@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النطاق hbtf.ai للبيع</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>hbtf.ai | للبيع</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary-color: #00f2fe;
-            --secondary-color: #4facfe;
-            --text-color: #ffffff;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-color: #0b0f19;
+            --card-bg: #131a26;
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --accent: #10b981;
+            --text: #ffffff;
+            --text-muted: #94a3b8;
         }
 
         * {
@@ -23,226 +25,245 @@
         }
 
         body {
-            background: #0f172a;
+            background-color: var(--bg-color);
+            /* خلفية متدرجة ثابتة بدون حركة ثقيلة لمنع التعليق */
             background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.3) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(197,100%,48%,0.15) 0, transparent 50%);
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.05) 0%, transparent 40%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: var(--text-color);
-            overflow: hidden;
+            color: var(--text);
             padding: 20px;
+            overflow-x: hidden;
         }
 
-        /* تأثير الخلفية المتحركة */
-        .bg-animation {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: var(--secondary-color);
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.4;
-            animation: move 10s infinite alternate;
-            z-index: -1;
-        }
-
-        @keyframes move {
-            0% { transform: translate(-100px, -100px); }
-            100% { transform: translate(100px, 100px); }
-        }
-
-        /* تصميم البطاقة الزجاجية */
+        /* أنميشن ظهور الكرت الرئيسي بسلاسة */
         .card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 24px;
-            padding: 50px 40px;
+            padding: 40px;
             text-align: center;
-            max-width: 600px;
+            max-width: 550px;
             width: 100%;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 1.5s ease-out;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            will-change: transform, opacity;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        .status {
-            display: inline-block;
-            background: rgba(0, 242, 254, 0.1);
-            color: var(--primary-color);
-            padding: 8px 16px;
-            border-radius: 20px;
+        /* إشارة متوهجة تنبض (Pulse Animation) */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            padding: 6px 16px;
+            border-radius: 30px;
             font-size: 0.9rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            border: 1px solid rgba(0, 242, 254, 0.3);
-            letter-spacing: 1px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
-        .domain-name {
-            font-size: clamp(3rem, 8vw, 4.5rem);
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .badge-dot::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 1.8s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        /* اسم الدومين مع أنميشن توهج خفيف وسلس */
+        .domain {
+            font-size: clamp(2.5rem, 7vw, 4rem);
             font-weight: 900;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             direction: ltr;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .description {
-            font-size: 1.2rem;
-            color: #94a3b8;
-            margin-bottom: 30px;
-        }
-
-        /* قسم السعر */
-        .price-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-
-        .price-box {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            padding: 15px 25px;
-            border-radius: 16px;
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-
-        .price-box:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-        }
-
-        .price-amount {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .price-currency {
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
-
-        /* قسم التواصل */
-        .contact-info {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 30px;
-            text-align: right;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .info-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .info-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 15px;
-            font-size: 1.2rem;
-        }
-
-        .cta-btn {
             display: inline-block;
-            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            letter-spacing: -1px;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 0px rgba(0,242,254,0); }
+            to { text-shadow: 0 0 20px rgba(0, 242, 254, 0.2); }
+        }
+
+        .subtext {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 35px;
+        }
+
+        /* حاوية الأسعار وتأثيرات الحركية عند تمرير الماوس */
+        .price-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .price-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .price-card:hover {
+            transform: scale(1.03);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 242, 254, 0.05);
+        }
+
+        .price-val {
+            font-size: 1.6rem;
+            font-weight: 800;
             color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .price-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* تفاصيل البيانات الشخصية */
+        .details-list {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-row:first-child {
+            padding-top: 0;
+        }
+
+        .detail-lbl {
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .detail-val {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        /* زر التواصل الأكشن وتأثيره الحركي السلس الحجم المتغير */
+        .btn-whatsapp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: #0b0f19;
             text-decoration: none;
-            padding: 16px 40px;
-            border-radius: 30px;
+            padding: 16px;
+            border-radius: 14px;
             font-size: 1.2rem;
-            font-weight: 700;
+            font-weight: 800;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(0, 242, 254, 0.2);
-            width: 100%;
+            box-shadow: 0 8px 24px rgba(0, 242, 254, 0.2);
         }
 
-        .cta-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 15px 25px rgba(0, 242, 254, 0.4);
+        .btn-whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 242, 254, 0.4);
+            filter: brightness(1.1);
         }
 
+        .btn-whatsapp:active {
+            transform: translateY(1px);
+        }
+
+        .btn-whatsapp svg {
+            width: 24px;
+            height: 24px;
+            fill: #0b0f19;
+        }
+
+        /* استجابة الشاشات الصغيرة */
         @media (max-width: 480px) {
             .card { padding: 30px 20px; }
-            .price-container { flex-direction: column; gap: 10px; }
+            .price-grid { grid-template-columns: 1fr; gap: 12px; }
+            .domain { font-size: 2.8rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-animation"></div>
-
     <div class="card">
-        <div class="status">● متاح للبيع</div>
+        <div class="badge">
+            <span class="badge-dot"></span>
+            <span>هذا النطاق متاح للشراء الفوري</span>
+        </div>
         
-        <h1 class="domain-name">hbtf.ai</h1>
-        <p class="description">استثمر في المستقبل مع هذا النطاق المميز والفريد.</p>
+        <h1 class="domain">hbtf.ai</h1>
+        <p class="subtext">فرصة استثمارية ممتازة لشركات الذكاء الاصطناعي والتكنولوجيا.</p>
 
-        <div class="price-container">
-            <div class="price-box">
-                <div class="price-amount">10,000</div>
-                <div class="price-currency">دينار أردني (JOD)</div>
+        <div class="price-grid">
+            <div class="price-card">
+                <div class="price-val">10,000</div>
+                <div class="price-label">دينار أردني (JOD)</div>
             </div>
-            <div class="price-box">
-                <div class="price-amount">14,100</div>
-                <div class="price-currency">دولار أمريكي (USD)</div>
-            </div>
-        </div>
-
-        <div class="contact-info">
-            <div class="info-item">
-                <div class="info-icon">📍</div>
-                <div>
-                    <div class="price-currency">الدولة</div>
-                    <div>الأردن</div>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-icon">📞</div>
-                <div>
-                    <div class="price-currency">رقم الهاتف</div>
-                    <div dir="ltr">079 092 6407</div>
-                </div>
+            <div class="price-card">
+                <div class="price-val">14,100</div>
+                <div class="price-label">دولار أمريكي (USD)</div>
             </div>
         </div>
 
-        <a href="https://wa.me/962790926407" class="cta-btn" target="_blank">
-            تواصل الآن عبر واتساب
-        </a>
-    </div>
-
-</body>
-</html>
+        <div class="details-list">
+            <div class="detail-row">
+                <div class="detail-lbl"><span>📍</span> الموقع الجغرافي</div>
